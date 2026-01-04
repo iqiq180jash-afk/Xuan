@@ -957,7 +957,7 @@ local function toggleFastAttack()
 
                 local Settings = {
                     AutoClick = true,
-                    ClickDelay = 0.00000000000000001
+                    ClickDelay = 0.3
                 }
 
                 local Module = {}
@@ -1079,12 +1079,53 @@ local function loadScript(name, url, button, status, text, icon)
         if button and status then
             button.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
             status.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            if icon then
+                icon.Text = "✅"
+            end
+            if text then
+                text.Text = text.Text .. " [已加載]"
+            end
         end
     else
-        print("❌ " .. name .. " 加載失敗")
+        print("❌ " .. name .. " 加載失敗: " .. tostring(result))
         if button and status then
             button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
             status.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        end
+    end
+    
+    return success, result
+end
+
+-- ========================
+-- 飛行腳本功能（使用您提供的新鏈接）
+-- ========================
+local flightActive = false
+
+local function toggleFlight()
+    if flightActive then
+        -- 如果已經激活，顯示提示
+        flightBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 55)
+        flightStatus.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
+        flightIcon.Text = "✈️"
+        flightText.Text = "飛行腳本"
+        print("✈️ 飛行腳本已關閉")
+        flightActive = false
+    else
+        -- 加載飛行腳本（使用您提供的新鏈接）
+        local success, result = loadScript(
+            "飛行腳本", 
+            "https://raw.githubusercontent.com/iqiq180jash-afk/Xuan/refs/heads/main/%E9%A3%9B%E8%A1%8C", 
+            flightBtn, 
+            flightStatus, 
+            flightText, 
+            flightIcon
+        )
+        
+        if success then
+            flightActive = true
+        else
+            flightActive = false
         end
     end
 end
@@ -1100,10 +1141,7 @@ xaBtn.MouseButton1Click:Connect(function()
                xaBtn, xaStatus, xaText, xaIcon)
 end)
 
-flightBtn.MouseButton1Click:Connect(function()
-    loadScript("飛行腳本", "https://raw.githubusercontent.com/kexuan001/rjrym/refs/heads/main/fly.lua", 
-               flightBtn, flightStatus, flightText, flightIcon)
-end)
+flightBtn.MouseButton1Click:Connect(toggleFlight)
 
 fpsBoostBtn.MouseButton1Click:Connect(function()
     loadScript("FPS優化", "https://raw.githubusercontent.com/kexuan001/rjrym/refs/heads/main/fpsboost", 
@@ -1113,7 +1151,7 @@ end)
 fastAttackBtn.MouseButton1Click:Connect(toggleFastAttack)
 
 -- ========================
--- 自動V4功能（您提供的新代碼）
+-- 自動V4功能
 -- ========================
 local autoV4Active = false
 local autoV4Connection = nil
@@ -1214,6 +1252,7 @@ print("🎮 功能特色:")
 print("🎮   ✅ Luna Interface Suite 載入畫面（無黑色背景）")
 print("🎮   ✅ 腳本區/功能區分類顯示（下移15px）")
 print("🎮   ✅ 快速攻擊功能（新版代碼）")
+print("🎮   ✅ 飛行腳本（新鏈接版本）")
 print("🎮   ✅ 自動V4功能（本地調用，每5秒一次）")
 print("🎮   ✅ 側邊按鈕可拖動移動")
 print("🎮   ✅ 橫向現代化UI")
