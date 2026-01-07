@@ -1,6 +1,6 @@
--- 玄丛腳本 - 簡化修復版 v9.8
+-- 玄丛腳本 - ShadowLib風格修復版 v9.8
 print("🎮 =================================")
-print("🎮 玄丛腳本 - 簡化修復版 v9.8")
+print("🎮 玄丛腳本 - ShadowLib風格修復版 v9.8")
 print("🎮 秦始皇创作")
 print("🎮 專業級遊戲輔助")
 print("🎮 =================================")
@@ -42,1032 +42,332 @@ print("✅ UI容器: " .. playerGui.Name)
 
 -- 清理舊的UI
 for _, gui in ipairs(playerGui:GetChildren()) do
-    if gui.Name:find("XuanCong") or gui.Name:find("玄丛") then
+    if gui.Name:find("XuanCong") or gui.Name:find("玄丛") or gui.Name:find("ShadowLib") then
         gui:Destroy()
         print("🗑️ 清理了舊UI: " .. gui.Name)
     end
 end
 
 -- ========================
--- 創建主UI ScreenGui
+-- ShadowLib 庫系統
 -- ========================
-print("🔧 創建主UI...")
+local library = { 
+    _Tabs = {}, 
+    _Pages = {},
+    _Functions = {} -- 存儲功能狀態
+}
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "玄丛腳本_v9_8"
-screenGui.Parent = playerGui
-screenGui.ResetOnSpawn = false
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-screenGui.DisplayOrder = 999
-screenGui.IgnoreGuiInset = false
-
--- ========================
--- Luna Interface Suite 風格載入畫面（沒有黑色背景）
--- ========================
-print("🎬 顯示 Luna Interface Suite 載入畫面...")
-
--- 主要載入畫面框架（直接創建，沒有黑色遮罩）
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Name = "LunaLoadingFrame"
-loadingFrame.Size = UDim2.new(0, 450, 0, 180)
-loadingFrame.Position = UDim2.new(0.5, -225, 0.5, -90)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
-loadingFrame.BackgroundTransparency = 0.05
-loadingFrame.BorderSizePixel = 0
-loadingFrame.ZIndex = 1001
-loadingFrame.Parent = screenGui
-
--- 黑色邊框
-local borderFrame = Instance.new("Frame")
-borderFrame.Name = "Border"
-borderFrame.Size = UDim2.new(1, 4, 1, 4)
-borderFrame.Position = UDim2.new(0, -2, 0, -2)
-borderFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-borderFrame.BorderSizePixel = 0
-borderFrame.ZIndex = 1000
-borderFrame.Parent = loadingFrame
-
--- 藍色頂部邊框
-local topBorder = Instance.new("Frame")
-topBorder.Name = "TopBorder"
-topBorder.Size = UDim2.new(1, 0, 0, 2)
-topBorder.Position = UDim2.new(0, 0, 0, 0)
-topBorder.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-topBorder.BorderSizePixel = 0
-topBorder.ZIndex = 1002
-topBorder.Parent = loadingFrame
-
--- 圓角
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 6)
-frameCorner.Parent = loadingFrame
-
-local borderCorner = Instance.new("UICorner")
-borderCorner.CornerRadius = UDim.new(0, 8)
-borderCorner.Parent = borderFrame
-
--- Luna Interface Suite 標題
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "Title"
-titleLabel.Size = UDim2.new(1, 0, 0, 20)
-titleLabel.Position = UDim2.new(0, 0, 0, 10)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Luna Interface Suite"
-titleLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 14
-titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleLabel.ZIndex = 1002
-titleLabel.Parent = loadingFrame
-
--- 作者標籤
-local authorLabel = Instance.new("TextLabel")
-authorLabel.Name = "Author"
-authorLabel.Size = UDim2.new(1, 0, 0, 14)
-authorLabel.Position = UDim2.new(0, 0, 0, 28)
-authorLabel.BackgroundTransparency = 1
-authorLabel.Text = "by Nebula Softworks"
-authorLabel.TextColor3 = Color3.fromRGB(150, 150, 180)
-authorLabel.Font = Enum.Font.Gotham
-authorLabel.TextSize = 10
-authorLabel.TextXAlignment = Enum.TextXAlignment.Center
-authorLabel.ZIndex = 1002
-authorLabel.Parent = loadingFrame
-
--- 分隔線
-local separator1 = Instance.new("Frame")
-separator1.Name = "Separator1"
-separator1.Size = UDim2.new(1, -40, 0, 1)
-separator1.Position = UDim2.new(0, 20, 0, 50)
-separator1.BackgroundColor3 = Color3.fromRGB(60, 80, 100)
-separator1.BackgroundTransparency = 0.5
-separator1.BorderSizePixel = 0
-separator1.ZIndex = 1002
-separator1.Parent = loadingFrame
-
--- 系統初始化標籤
-local systemLabel = Instance.new("TextLabel")
-systemLabel.Name = "SystemLabel"
-systemLabel.Size = UDim2.new(1, -40, 0, 18)
-systemLabel.Position = UDim2.new(0, 20, 0, 60)
-systemLabel.BackgroundTransparency = 1
-systemLabel.Text = "[ 系統初始化中... ]"
-systemLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-systemLabel.Font = Enum.Font.Gotham
-systemLabel.TextSize = 11
-systemLabel.TextXAlignment = Enum.TextXAlignment.Left
-systemLabel.ZIndex = 1002
-systemLabel.Parent = loadingFrame
-
--- 進度條背景
-local progressBarBg = Instance.new("Frame")
-progressBarBg.Name = "ProgressBarBg"
-progressBarBg.Size = UDim2.new(1, -40, 0, 12)
-progressBarBg.Position = UDim2.new(0, 20, 0, 85)
-progressBarBg.BackgroundColor3 = Color3.fromRGB(30, 40, 50)
-progressBarBg.BorderSizePixel = 0
-progressBarBg.ZIndex = 1002
-progressBarBg.Parent = loadingFrame
-
-local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(0, 4)
-barCorner.Parent = progressBarBg
-
--- 進度條前景
-local progressBar = Instance.new("Frame")
-progressBar.Name = "ProgressBar"
-progressBar.Size = UDim2.new(0, 0, 1, 0) -- 從0開始
-progressBar.Position = UDim2.new(0, 0, 0, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-progressBar.BorderSizePixel = 0
-progressBar.ZIndex = 1003
-progressBar.Parent = progressBarBg
-
-local progressCorner = Instance.new("UICorner")
-progressCorner.CornerRadius = UDim.new(0, 4)
-progressCorner.Parent = progressBar
-
--- 載入百分比標籤
-local percentLabel = Instance.new("TextLabel")
-percentLabel.Name = "PercentLabel"
-percentLabel.Size = UDim2.new(1, -40, 0, 16)
-percentLabel.Position = UDim2.new(0, 20, 0, 100)
-percentLabel.BackgroundTransparency = 1
-percentLabel.Text = "載入中 0%"
-percentLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
-percentLabel.Font = Enum.Font.Gotham
-percentLabel.TextSize = 10
-percentLabel.TextXAlignment = Enum.TextXAlignment.Center
-percentLabel.ZIndex = 1002
-percentLabel.Parent = loadingFrame
-
--- 資料接收標籤
-local dataLabel = Instance.new("TextLabel")
-dataLabel.Name = "DataLabel"
-dataLabel.Size = UDim2.new(1, -40, 0, 14)
-dataLabel.Position = UDim2.new(0, 20, 0, 120)
-dataLabel.BackgroundTransparency = 1
-dataLabel.Text = "已接收資料：0 / 上限"
-dataLabel.TextColor3 = Color3.fromRGB(150, 200, 100)
-dataLabel.Font = Enum.Font.Gotham
-dataLabel.TextSize = 10
-dataLabel.TextXAlignment = Enum.TextXAlignment.Center
-dataLabel.ZIndex = 1002
-dataLabel.Parent = loadingFrame
-
--- 分隔線2
-local separator2 = Instance.new("Frame")
-separator2.Name = "Separator2"
-separator2.Size = UDim2.new(1, -40, 0, 1)
-separator2.Position = UDim2.new(0, 20, 0, 140)
-separator2.BackgroundColor3 = Color3.fromRGB(60, 80, 100)
-separator2.BackgroundTransparency = 0.5
-separator2.BorderSizePixel = 0
-separator2.ZIndex = 1002
-separator2.Parent = loadingFrame
-
--- 模式顯示標籤
-local modeLabel = Instance.new("TextLabel")
-modeLabel.Name = "ModeLabel"
-modeLabel.Size = UDim2.new(1, -40, 0, 12)
-modeLabel.Position = UDim2.new(0, 20, 0, 145)
-modeLabel.BackgroundTransparency = 1
-modeLabel.Text = "模式：閉隱藏 穿插模式"
-modeLabel.TextColor3 = Color3.fromRGB(180, 180, 200)
-modeLabel.Font = Enum.Font.Gotham
-modeLabel.TextSize = 9
-modeLabel.TextXAlignment = Enum.TextXAlignment.Left
-modeLabel.ZIndex = 1002
-modeLabel.Parent = loadingFrame
-
--- 狀態顯示標籤
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Name = "StatusLabel"
-statusLabel.Size = UDim2.new(1, -40, 0, 12)
-statusLabel.Position = UDim2.new(0, 20, 0, 160)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "狀態：安全區 - 已停用玩家對玩家"
-statusLabel.TextColor3 = Color3.fromRGB(180, 180, 200)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 9
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.ZIndex = 1002
-statusLabel.Parent = loadingFrame
-
--- 底部提示
-local hintLabel = Instance.new("TextLabel")
-hintLabel.Name = "HintLabel"
-hintLabel.Size = UDim2.new(1, -40, 0, 16)
-hintLabel.Position = UDim2.new(0, 20, 0, 175)
-hintLabel.BackgroundTransparency = 1
-hintLabel.Text = "< 請稍候，正在建立軌道連結... >"
-hintLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-hintLabel.Font = Enum.Font.Gotham
-hintLabel.TextSize = 9
-hintLabel.TextXAlignment = Enum.TextXAlignment.Center
-hintLabel.ZIndex = 1002
-hintLabel.Parent = loadingFrame
-
--- ========================
--- 簡化但可靠的載入動畫
--- ========================
-local dots = {"", ".", "..", "..."}
-local dotIndex = 1
-local progress = 0
-local animationActive = true
-local animationConnection
-
--- 創建側邊按鈕（立即顯示）
-local sidebarButton = Instance.new("TextButton")
-sidebarButton.Name = "SidebarButton"
-sidebarButton.Size = UDim2.new(0, 40, 0, 40)
-sidebarButton.Position = UDim2.new(0, 10, 0, 10)
-sidebarButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-sidebarButton.BackgroundTransparency = 0.1
-sidebarButton.BorderSizePixel = 0
-sidebarButton.Text = "⚙️"
-sidebarButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-sidebarButton.Font = Enum.Font.GothamBold
-sidebarButton.TextSize = 16
-sidebarButton.AutoButtonColor = true
-sidebarButton.ZIndex = 1000
-sidebarButton.Visible = true
-sidebarButton.Parent = screenGui
-
--- 圓角
-local sidebarCorner = Instance.new("UICorner")
-sidebarCorner.CornerRadius = UDim.new(0, 8)
-sidebarCorner.Parent = sidebarButton
-
--- 邊框
-local sidebarStroke = Instance.new("UIStroke")
-sidebarStroke.Color = Color3.fromRGB(0, 150, 255)
-sidebarStroke.Thickness = 1.5
-sidebarStroke.Parent = sidebarButton
-
--- 懸停提示
-local buttonHint = Instance.new("TextLabel")
-buttonHint.Name = "ButtonHint"
-buttonHint.Size = UDim2.new(0, 100, 0, 24)
-buttonHint.Position = UDim2.new(0, 45, 0, 9)
-buttonHint.BackgroundColor3 = Color3.fromRGB(20, 30, 45)
-buttonHint.BackgroundTransparency = 0.1
-buttonHint.Text = "開啟玄丛腳本"
-buttonHint.TextColor3 = Color3.fromRGB(220, 230, 255)
-buttonHint.Font = Enum.Font.Gotham
-buttonHint.TextSize = 10
-buttonHint.TextXAlignment = Enum.TextXAlignment.Center
-buttonHint.Visible = false
-buttonHint.ZIndex = 999
-buttonHint.Parent = screenGui
-
-local hintCorner = Instance.new("UICorner")
-hintCorner.CornerRadius = UDim.new(0, 5)
-hintCorner.Parent = buttonHint
-
--- ========================
--- 側邊按鈕拖動功能
--- ========================
-local dragging = false
-local dragInput
-local dragStart
-local startPos
-
--- 開始拖動
-local function beginDrag(input)
-    dragging = true
-    dragStart = input.Position
-    startPos = sidebarButton.Position
-    
-    -- 捕捉滑鼠移動
-    input.Changed:Connect(function()
-        if input.UserInputState == Enum.UserInputState.End then
-            dragging = false
-        end
-    end)
-end
-
--- 更新拖動位置
-local function updateDrag(input)
-    if dragging then
-        local delta = input.Position - dragStart
-        sidebarButton.Position = UDim2.new(
-            startPos.X.Scale, 
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale, 
-            startPos.Y.Offset + delta.Y
-        )
-        
-        -- 更新提示位置
-        buttonHint.Position = UDim2.new(
-            0, 
-            sidebarButton.Position.X.Offset + 45,
-            0, 
-            sidebarButton.Position.Y.Offset + 9
-        )
+local services = setmetatable({}, {
+    __index = function(_, k) 
+        return game:GetService(k) 
     end
-end
+})
 
--- 為電腦設備設置拖動
-if not isMobile then
-    sidebarButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            beginDrag(input)
-            return
-        end
-    end)
+local ts, uis, players = services.TweenService, services.UserInputService, services.Players
+local lp = players.LocalPlayer
 
-    sidebarButton.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    inputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            updateDrag(input)
-        end
-    end)
-else
-    -- 為手機設備設置觸摸拖動
-    local touchStartPos
-    local touchStartTime
-    local isDraggingTouch = false
-    
-    sidebarButton.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            touchStartPos = input.Position
-            touchStartTime = tick()
-            isDraggingTouch = true
-            
-            -- 長按檢測（避免與點擊衝突）
-            task.spawn(function()
-                task.wait(0.3) -- 長按0.3秒開始拖動
-                if isDraggingTouch then
-                    beginDrag(input)
-                end
-            end)
+-- 拖動功能
+function library:AddDrag(obj)
+    local dragging, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = obj.Position
         end
     end)
     
-    sidebarButton.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
+    uis.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            obj.Position = UDim2.new(
+                startPos.X.Scale, 
+                startPos.X.Offset + delta.X, 
+                startPos.Y.Scale, 
+                startPos.Y.Offset + delta.Y
+            )
         end
     end)
     
-    inputService.InputChanged:Connect(function(input)
-        if input == dragInput and isDraggingTouch then
-            -- 計算觸摸移動距離
-            local currentPos = input.Position
-            local delta = (currentPos - touchStartPos).Magnitude
-            
-            -- 如果移動超過20像素，開始拖動
-            if delta > 20 then
-                beginDrag(input)
-                updateDrag(input)
-            end
-        end
-    end)
-    
-    sidebarButton.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            isDraggingTouch = false
-            dragging = false
-            
-            -- 檢查是否為點擊（短按）
-            local touchEndTime = tick()
-            if touchEndTime - touchStartTime < 0.3 then
-                toggleUI() -- 短按是點擊功能
-            end
-        end
+    uis.InputEnded:Connect(function() 
+        dragging = false 
     end)
 end
 
--- 啟動載入動畫
-task.spawn(function()
-    local startTime = tick()
+-- 創建主窗口
+function library.new(name)
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "ShadowLib_XuanCong"
+    sg.ResetOnSpawn = false
+    sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    sg.Parent = playerGui
     
-    animationConnection = runService.RenderStepped:Connect(function()
-        if not animationActive then
-            animationConnection:Disconnect()
-            return
-        end
-        
-        -- 計算進度（3秒完成）
-        local elapsed = tick() - startTime
-        progress = math.min(elapsed / 3 * 100, 100)
-        
-        -- 更新進度條
-        progressBar.Size = UDim2.new(progress / 100, 0, 1, 0)
-        percentLabel.Text = "載入中 " .. math.floor(progress) .. "%"
-        
-        -- 更新資料
-        local dataValue = math.floor(99 * (progress / 100))
-        dataLabel.Text = "已接收資料：" .. dataValue .. " / 上限"
-        
-        -- 更新提示動畫
-        dotIndex = dotIndex + 1
-        if dotIndex > #dots then dotIndex = 1 end
-        hintLabel.Text = "< 請稍候，正在建立軌道連結" .. dots[dotIndex] .. " >"
-        
-        -- 完成檢查
-        if progress >= 100 then
-            animationActive = false
+    -- 載入畫面
+    local loadFrame = Instance.new("Frame", sg)
+    loadFrame.Size = UDim2.new(0, 350, 0, 150)
+    loadFrame.Position = UDim2.new(0.5, -175, 0.5, -75)
+    loadFrame.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
+    loadFrame.BackgroundTransparency = 0.05
+    loadFrame.BorderSizePixel = 0
+    Instance.new("UICorner", loadFrame)
+    
+    local barBg = Instance.new("Frame", loadFrame)
+    barBg.Size = UDim2.new(0.8, 0, 0, 10)
+    barBg.Position = UDim2.new(0.1, 0, 0.7, 0)
+    barBg.BackgroundColor3 = Color3.fromRGB(30, 40, 50)
+    barBg.BorderSizePixel = 0
+    
+    local bar = Instance.new("Frame", barBg)
+    bar.Size = UDim2.new(0, 0, 1, 0)
+    bar.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+    bar.BorderSizePixel = 0
+    Instance.new("UICorner", bar)
+    
+    local info = Instance.new("TextLabel", loadFrame)
+    info.Size = UDim2.new(1, 0, 0.4, 0)
+    info.Position = UDim2.new(0, 0, 0.1, 0)
+    info.Text = name .. " 加載中..."
+    info.TextColor3 = Color3.fromRGB(255, 255, 255)
+    info.BackgroundTransparency = 1
+    info.Font = Enum.Font.GothamBold
+    info.TextSize = 16
+    
+    local author = Instance.new("TextLabel", loadFrame)
+    author.Size = UDim2.new(1, 0, 0, 25)
+    author.Position = UDim2.new(0, 0, 0.3, 0)
+    author.Text = "by 秦始皇"
+    author.TextColor3 = Color3.fromRGB(255, 215, 0)
+    author.BackgroundTransparency = 1
+    author.Font = Enum.Font.Gotham
+    author.TextSize = 14
+    
+    -- 載入動畫
+    ts:Create(bar, TweenInfo.new(2, Enum.EasingStyle.Quart), {Size = UDim2.new(1, 0, 1, 0)}):Play()
+    task.wait(2.2)
+    loadFrame:Destroy()
+    
+    -- 主窗口
+    local Main = Instance.new("Frame", sg)
+    Main.Size = UDim2.new(0, 500, 0, 320)
+    Main.Position = UDim2.new(0.5, -250, 0.5, -160)
+    Main.BackgroundColor3 = Color3.fromRGB(15, 17, 22)
+    Main.BackgroundTransparency = 0.05
+    Main.Visible = false
+    Main.ClipsDescendants = true
+    Main.BorderSizePixel = 0
+    Instance.new("UICorner", Main)
+    library:AddDrag(Main)
+    library.Main = Main
+    
+    -- 開關按鈕 - 皇冠 👑 (改為完全圓形)
+    local ToggleBtn = Instance.new("TextButton", sg)
+    ToggleBtn.Size = UDim2.new(0, 55, 0, 55)
+    ToggleBtn.Position = UDim2.new(0, 20, 0, 20)
+    ToggleBtn.BackgroundColor3 = Color3.fromRGB(25, 20, 10)
+    ToggleBtn.Text = "👑"
+    ToggleBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
+    ToggleBtn.TextSize = 32
+    ToggleBtn.ZIndex = 10
+    ToggleBtn.AutoButtonColor = true
+    ToggleBtn.BorderSizePixel = 0
+    
+    -- 完全圓形
+    local crownCorner = Instance.new("UICorner", ToggleBtn)
+    crownCorner.CornerRadius = UDim.new(1, 0) -- 完全圓形
+    
+    local crownStroke = Instance.new("UIStroke", ToggleBtn)
+    crownStroke.Color = Color3.fromRGB(255, 215, 0)
+    crownStroke.Thickness = 2.5
+    
+    library:AddDrag(ToggleBtn)
+    
+    local glowEffect = Instance.new("Frame", ToggleBtn)
+    glowEffect.Size = UDim2.new(1, 6, 1, 6)
+    glowEffect.Position = UDim2.new(0, -3, 0, -3)
+    glowEffect.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+    glowEffect.BackgroundTransparency = 0.7
+    glowEffect.BorderSizePixel = 0
+    glowEffect.ZIndex = 9
+    -- 圓形發光效果
+    local glowCorner = Instance.new("UICorner", glowEffect)
+    glowCorner.CornerRadius = UDim.new(1, 0) -- 完全圓形
+    
+    -- 金色漣漪動畫 (圓形)
+    task.spawn(function()
+        while true do
+            if not sg.Parent then break end
+            local Ripple = Instance.new("Frame", ToggleBtn)
+            Ripple.AnchorPoint = Vector2.new(0.5, 0.5)
+            Ripple.Position = UDim2.new(0.5, 0, 0.5, 0)
+            Ripple.Size = UDim2.new(1, 0, 1, 0)
+            Ripple.BackgroundTransparency = 0.6
+            Ripple.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+            Ripple.BorderSizePixel = 0
+            Ripple.ZIndex = 8
+            -- 圓形漣漪
+            local rippleCorner = Instance.new("UICorner", Ripple)
+            rippleCorner.CornerRadius = UDim.new(1, 0) -- 完全圓形
             
-            -- 顯示完成狀態
-            percentLabel.Text = "載入中 100%"
-            dataLabel.Text = "已接收資料：99 / 上限"
-            hintLabel.Text = "< 軌道連結已建立 >"
-            progressBar.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-            
-            -- 等待1秒顯示完成狀態
-            task.wait(1)
-            
-            -- 淡出載入畫面
-            local fadeOut = tweenService:Create(loadingFrame, TweenInfo.new(0.5), {
+            ts:Create(Ripple, TweenInfo.new(1.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                Size = UDim2.new(2.5, 0, 2.5, 0),
                 BackgroundTransparency = 1
-            })
+            }):Play()
+            task.wait(2)
+            if Ripple then Ripple:Destroy() end
+        end
+    end)
+    
+    -- 開關按鈕功能
+    ToggleBtn.MouseButton1Click:Connect(function()
+        if not Main.Visible then
+            Main.Size = UDim2.new(0, 500, 0, 0)
+            Main.Visible = true
+            ts:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 500, 0, 320)}):Play()
             
-            -- 同時淡出所有文字
-            local fadeOutTitle = tweenService:Create(titleLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
+            ts:Create(ToggleBtn, TweenInfo.new(0.1), {
+                Size = UDim2.new(0, 53, 0, 53)
+            }):Play()
+            task.wait(0.1)
+            ts:Create(ToggleBtn, TweenInfo.new(0.1), {
+                Size = UDim2.new(0, 55, 0, 55)
+            }):Play()
+        else
+            ts:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 500, 0, 0)}):Play()
             
-            local fadeOutAuthor = tweenService:Create(authorLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
+            ts:Create(ToggleBtn, TweenInfo.new(0.1), {
+                Size = UDim2.new(0, 53, 0, 53)
+            }):Play()
+            task.wait(0.1)
+            ts:Create(ToggleBtn, TweenInfo.new(0.1), {
+                Size = UDim2.new(0, 55, 0, 55)
+            }):Play()
             
-            local fadeOutSystem = tweenService:Create(systemLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
-            
-            local fadeOutPercent = tweenService:Create(percentLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
-            
-            local fadeOutData = tweenService:Create(dataLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
-            
-            local fadeOutHint = tweenService:Create(hintLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
-            
-            local fadeOutMode = tweenService:Create(modeLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
-            
-            local fadeOutStatus = tweenService:Create(statusLabel, TweenInfo.new(0.5), {
-                TextTransparency = 1
-            })
-            
-            -- 播放所有淡出動畫
-            fadeOut:Play()
-            fadeOutTitle:Play()
-            fadeOutAuthor:Play()
-            fadeOutSystem:Play()
-            fadeOutPercent:Play()
-            fadeOutData:Play()
-            fadeOutHint:Play()
-            fadeOutMode:Play()
-            fadeOutStatus:Play()
-            
-            -- 等待淡出完成
-            fadeOut.Completed:Wait()
-            
-            -- 安全移除
-            if loadingFrame and loadingFrame.Parent then
-                loadingFrame:Destroy()
-                print("✅ Luna Interface Suite 載入畫面完成")
+            task.wait(0.3)
+            Main.Visible = false
+        end
+    end)
+    
+    ToggleBtn.MouseEnter:Connect(function()
+        ts:Create(ToggleBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(40, 35, 20),
+            TextColor3 = Color3.fromRGB(255, 255, 100)
+        }):Play()
+        ts:Create(crownStroke, TweenInfo.new(0.2), {
+            Color = Color3.fromRGB(255, 255, 100),
+            Thickness = 3
+        }):Play()
+        ts:Create(glowEffect, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.5
+        }):Play()
+    end)
+    
+    ToggleBtn.MouseLeave:Connect(function()
+        ts:Create(ToggleBtn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(25, 20, 10),
+            TextColor3 = Color3.fromRGB(255, 215, 0)
+        }):Play()
+        ts:Create(crownStroke, TweenInfo.new(0.2), {
+            Color = Color3.fromRGB(255, 215, 0),
+            Thickness = 2.5
+        }):Play()
+        ts:Create(glowEffect, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0.7
+        }):Play()
+    end)
+    
+    return library
+end
+
+-- 創建選項卡
+function library:CreateTab(name)
+    local SideBar = self.Main:FindFirstChild("SideBar") or Instance.new("Frame", self.Main)
+    
+    if SideBar.Name ~= "SideBar" then
+        SideBar.Name = "SideBar"
+        SideBar.Size = UDim2.new(0, 120, 1, -35)
+        SideBar.Position = UDim2.new(0, 0, 0, 35)
+        SideBar.BackgroundColor3 = Color3.fromRGB(10, 12, 15)
+        SideBar.BackgroundTransparency = 0.1
+        SideBar.BorderSizePixel = 0
+        Instance.new("UICorner", SideBar)
+        
+        local layout = Instance.new("UIListLayout", SideBar)
+        layout.Padding = UDim.new(0, 8)
+        layout.HorizontalAlignment = "Center"
+        layout.VerticalAlignment = "Top"
+        layout.SortOrder = "LayoutOrder"
+    end
+    
+    local ContentPage = Instance.new("ScrollingFrame", self.Main)
+    ContentPage.Name = name .. "_Page"
+    ContentPage.Size = UDim2.new(1, -135, 1, -55)
+    ContentPage.Position = UDim2.new(0, 130, 0, 45)
+    ContentPage.BackgroundTransparency = 1
+    ContentPage.Visible = false
+    ContentPage.ScrollBarThickness = 2
+    ContentPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    ContentPage.BorderSizePixel = 0
+    
+    local pageLayout = Instance.new("UIListLayout", ContentPage)
+    pageLayout.Padding = UDim.new(0, 10)
+    pageLayout.HorizontalAlignment = "Center"
+    pageLayout.SortOrder = "LayoutOrder"
+    
+    local TabBtn = Instance.new("TextButton", SideBar)
+    TabBtn.Size = UDim2.new(0.9, 0, 0, 40)
+    TabBtn.Text = name:upper()
+    TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+    TabBtn.BackgroundTransparency = 0.5
+    TabBtn.BorderSizePixel = 0
+    TabBtn.Font = Enum.Font.GothamBold
+    TabBtn.TextSize = 14
+    TabBtn.AutoButtonColor = true
+    Instance.new("UICorner", TabBtn)
+    
+    TabBtn.MouseButton1Click:Connect(function()
+        for _, child in ipairs(SideBar:GetChildren()) do
+            if child:IsA("TextButton") then
+                child.TextColor3 = Color3.fromRGB(150, 150, 150)
+                child.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
             end
-            
-            animationConnection:Disconnect()
         end
+        
+        TabBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(30, 25, 15)
+        
+        for _, p in pairs(self._Pages) do 
+            p.Visible = false 
+        end
+        ContentPage.Visible = true
     end)
-end)
-
--- 安全機制：5秒後強制移除載入畫面
-task.spawn(function()
-    task.wait(5)
     
-    if loadingFrame and loadingFrame.Parent then
-        print("⚠️ 安全機制：強制移除載入畫面")
-        
-        animationActive = false
-        if animationConnection then
-            animationConnection:Disconnect()
-        end
-        
-        loadingFrame:Destroy()
-        print("✅ 載入畫面已強制移除")
+    table.insert(self._Pages, ContentPage)
+    
+    if #self._Pages == 1 then 
+        ContentPage.Visible = true 
+        TabBtn.TextColor3 = Color3.fromRGB(255, 215, 0)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(30, 25, 15)
     end
-end)
-
--- ========================
--- 創建主框架（點擊時顯示）
--- ========================
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 480, 0, 280)
-mainFrame.Position = UDim2.new(0.5, -240, 0.5, -140)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
-mainFrame.BackgroundTransparency = 0.05
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false
-mainFrame.Active = true
-mainFrame.Parent = screenGui
-
--- 黑色背景邊框
-local bgFrame = Instance.new("Frame")
-bgFrame.Name = "BackgroundFrame"
-bgFrame.Size = UDim2.new(1, 4, 1, 4)
-bgFrame.Position = UDim2.new(0, -2, 0, -2)
-bgFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bgFrame.BorderSizePixel = 0
-bgFrame.ZIndex = -1
-bgFrame.Parent = mainFrame
-
--- 圓角
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0, 6)
-uiCorner.Parent = mainFrame
-
-local bgCorner = Instance.new("UICorner")
-bgCorner.CornerRadius = UDim.new(0, 8)
-bgCorner.Parent = bgFrame
-
--- 藍色邊框
-local borderFrame = Instance.new("Frame")
-borderFrame.Name = "Border"
-borderFrame.Size = UDim2.new(1, 0, 0, 2)
-borderFrame.Position = UDim2.new(0, 0, 0, 0)
-borderFrame.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-borderFrame.BorderSizePixel = 0
-borderFrame.ZIndex = 2
-borderFrame.Parent = mainFrame
-
--- 標題欄
-local titleBar = Instance.new("Frame")
-titleBar.Name = "TitleBar"
-titleBar.Size = UDim2.new(1, 0, 0, 32)
-titleBar.Position = UDim2.new(0, 0, 0, 2)
-titleBar.BackgroundTransparency = 1
-titleBar.Parent = mainFrame
-
--- 標題文字
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Name = "TitleLabel"
-titleLabel.Size = UDim2.new(1, -80, 1, 0)
-titleLabel.Position = UDim2.new(0, 12, 0, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "玄丛腳本 v9.8"
-titleLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
-titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 13
-titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-titleLabel.Parent = titleBar
-
--- 關閉按鈕
-local closeButton = Instance.new("TextButton")
-closeButton.Name = "CloseButton"
-closeButton.Size = UDim2.new(0, 24, 0, 24)
-closeButton.Position = UDim2.new(1, -28, 0, 4)
-closeButton.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-closeButton.BackgroundTransparency = 0.3
-closeButton.BorderSizePixel = 0
-closeButton.Text = "×"
-closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 18
-closeButton.AutoButtonColor = true
-closeButton.Parent = titleBar
-
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 4)
-closeCorner.Parent = closeButton
-
--- 分隔線
-local separator = Instance.new("Frame")
-separator.Name = "Separator"
-separator.Size = UDim2.new(1, -24, 0, 1)
-separator.Position = UDim2.new(0, 12, 0, 36)
-separator.BackgroundColor3 = Color3.fromRGB(60, 80, 100)
-separator.BackgroundTransparency = 0.5
-separator.BorderSizePixel = 0
-separator.Parent = mainFrame
-
--- ========================
--- 創建功能按鈕（分類顯示）
--- ========================
-print("🎯 創建功能按鈕...")
-
--- 腳本區（左側）
-local scriptsPanel = Instance.new("Frame")
-scriptsPanel.Name = "ScriptsPanel"
-scriptsPanel.Size = UDim2.new(0.5, -4, 0, 120)
-scriptsPanel.Position = UDim2.new(0, 12, 0, 60) -- 往下移15px
-scriptsPanel.BackgroundTransparency = 1
-scriptsPanel.Parent = mainFrame
-
--- 腳本區標題
-local scriptsTitle = Instance.new("TextLabel")
-scriptsTitle.Name = "ScriptsTitle"
-scriptsTitle.Size = UDim2.new(1, 0, 0, 20)
-scriptsTitle.Position = UDim2.new(0, 0, 0, -25)
-scriptsTitle.BackgroundTransparency = 1
-scriptsTitle.Text = "📜 腳本區"
-scriptsTitle.TextColor3 = Color3.fromRGB(200, 200, 255)
-scriptsTitle.Font = Enum.Font.GothamBold
-scriptsTitle.TextSize = 11
-scriptsTitle.TextXAlignment = Enum.TextXAlignment.Left
-scriptsTitle.Parent = scriptsPanel
-
--- 功能區（右側）
-local functionsPanel = Instance.new("Frame")
-functionsPanel.Name = "FunctionsPanel"
-functionsPanel.Size = UDim2.new(0.5, -4, 0, 220)
-functionsPanel.Position = UDim2.new(0.5, 0, 0, 60) -- 往下移15px
-functionsPanel.BackgroundTransparency = 1
-functionsPanel.Parent = mainFrame
-
--- 功能區標題
-local functionsTitle = Instance.new("TextLabel")
-functionsTitle.Name = "FunctionsTitle"
-functionsTitle.Size = UDim2.new(1, 0, 0, 20)
-functionsTitle.Position = UDim2.new(0, 0, 0, -25)
-functionsTitle.BackgroundTransparency = 1
-functionsTitle.Text = "⚙️ 功能區"
-functionsTitle.TextColor3 = Color3.fromRGB(200, 200, 255)
-functionsTitle.Font = Enum.Font.GothamBold
-functionsTitle.TextSize = 11
-functionsTitle.TextXAlignment = Enum.TextXAlignment.Left
-functionsTitle.Parent = functionsPanel
-
--- 按鈕創建函數
-local function createHorizontalButton(text, icon, xPos, yPos, color, panel)
-    local buttonFrame = Instance.new("Frame")
-    buttonFrame.Name = text .. "Frame"
-    buttonFrame.Size = UDim2.new(1, -8, 0, 32)
-    buttonFrame.Position = UDim2.new(0, xPos, 0, yPos)
-    buttonFrame.BackgroundTransparency = 1
-    buttonFrame.Parent = panel
     
-    local button = Instance.new("TextButton")
-    button.Name = text
-    button.Size = UDim2.new(1, 0, 1, 0)
-    button.Position = UDim2.new(0, 0, 0, 0)
-    button.BackgroundColor3 = Color3.fromRGB(30, 40, 55)
-    button.BackgroundTransparency = 0.3
-    button.BorderSizePixel = 0
-    button.Text = ""
-    button.AutoButtonColor = true
-    button.Active = true
-    button.Parent = buttonFrame
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 6)
-    corner.Parent = button
-    
-    -- 圖標
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Name = "Icon"
-    iconLabel.Size = UDim2.new(0, 24, 0, 24)
-    iconLabel.Position = UDim2.new(0, 8, 0, 4)
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Text = icon
-    iconLabel.TextColor3 = color
-    iconLabel.Font = Enum.Font.GothamBold
-    iconLabel.TextSize = 14
-    iconLabel.TextXAlignment = Enum.TextXAlignment.Center
-    iconLabel.Parent = buttonFrame
-    
-    -- 文字
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Name = "Text"
-    textLabel.Size = UDim2.new(1, -40, 1, 0)
-    textLabel.Position = UDim2.new(0, 36, 0, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = text
-    textLabel.TextColor3 = Color3.fromRGB(220, 220, 255)
-    textLabel.Font = Enum.Font.Gotham
-    textLabel.TextSize = 12
-    textLabel.TextXAlignment = Enum.TextXAlignment.Left
-    textLabel.Parent = buttonFrame
-    
-    -- 狀態指示器
-    local statusIndicator = Instance.new("Frame")
-    statusIndicator.Name = "StatusIndicator"
-    statusIndicator.Size = UDim2.new(0, 8, 0, 8)
-    statusIndicator.Position = UDim2.new(1, -14, 0.5, -4)
-    statusIndicator.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-    statusIndicator.BackgroundTransparency = 0.3
-    statusIndicator.BorderSizePixel = 0
-    statusIndicator.Parent = buttonFrame
-    
-    local statusCorner = Instance.new("UICorner")
-    statusCorner.CornerRadius = UDim.new(1, 0)
-    statusCorner.Parent = statusIndicator
-    
-    -- 懸停效果
-    button.MouseEnter:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
-    end)
-    
-    button.MouseLeave:Connect(function()
-        button.BackgroundColor3 = Color3.fromRGB(30, 40, 55)
-    end)
-    
-    return button, statusIndicator, textLabel, iconLabel
-end
-
--- 腳本區按鈕（左側）
-local piScriptBtn, piStatus, piText, piIcon = createHorizontalButton("皮腳本", "🅿️", 0, 0, Color3.fromRGB(220, 150, 50), scriptsPanel)
-local xaBtn, xaStatus, xaText, xaIcon = createHorizontalButton("XA腳本", "🌟", 0, 40, Color3.fromRGB(220, 120, 50), scriptsPanel)
-
--- 功能區按鈕（右側）
-local fastAttackBtn, fastAttackStatus, fastAttackText, fastAttackIcon = createHorizontalButton("快速攻擊", "⚡", 0, 0, Color3.fromRGB(0, 150, 220), functionsPanel)
-local flightBtn, flightStatus, flightText, flightIcon = createHorizontalButton("飛行腳本", "✈️", 0, 40, Color3.fromRGB(100, 200, 100), functionsPanel)
-local fpsBoostBtn, fpsStatus, fpsText, fpsIcon = createHorizontalButton("FPS優化", "🖥️", 0, 80, Color3.fromRGB(180, 100, 220), functionsPanel)
-local autoV4Btn, autoV4Status, autoV4Text, autoV4Icon = createHorizontalButton("自動V4", "🌀", 0, 120, Color3.fromRGB(150, 80, 200), functionsPanel)
-
--- 作者信息
-local authorLabel = Instance.new("TextLabel")
-authorLabel.Name = "AuthorLabel"
-authorLabel.Size = UDim2.new(1, -24, 0, 20)
-authorLabel.Position = UDim2.new(0, 12, 0, 245)
-authorLabel.BackgroundTransparency = 1
-authorLabel.Text = "👑 秦始皇创作 | 玄丛腳本 v9.8"
-authorLabel.TextColor3 = Color3.fromRGB(150, 150, 180)
-authorLabel.Font = Enum.Font.Gotham
-authorLabel.TextSize = 10
-authorLabel.TextXAlignment = Enum.TextXAlignment.Center
-authorLabel.Parent = mainFrame
-
-print("✅ UI創建完成")
-
--- ========================
--- UI顯示/隱藏功能
--- ========================
-local isUIVisible = false
-
-local function toggleUI()
-    isUIVisible = not isUIVisible
-    
-    if isUIVisible then
-        mainFrame.Visible = true
-        sidebarButton.Text = "📂"
-        sidebarButton.BackgroundColor3 = Color3.fromRGB(0, 120, 220)
-        buttonHint.Text = "關閉玄丛腳本"
-        
-        mainFrame.BackgroundTransparency = 1
-        
-        local fadeIn = tweenService:Create(mainFrame, TweenInfo.new(0.3), {
-            BackgroundTransparency = 0.05
-        })
-        fadeIn:Play()
-    else
-        sidebarButton.Text = "⚙️"
-        sidebarButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-        buttonHint.Text = "開啟玄丛腳本"
-        
-        local fadeOut = tweenService:Create(mainFrame, TweenInfo.new(0.2), {
-            BackgroundTransparency = 1
-        })
-        fadeOut:Play()
-        
-        fadeOut.Completed:Wait()
-        mainFrame.Visible = false
-    end
+    return ContentPage
 end
 
 -- ========================
--- 事件處理
+-- 創建主窗口
 -- ========================
-print("🔧 設置事件處理...")
+local window = library.new("玄丛腳本 v9.8")
 
--- 懸停效果
-sidebarButton.MouseEnter:Connect(function()
-    buttonHint.Visible = true
-    sidebarStroke.Color = Color3.fromRGB(0, 180, 255)
-    sidebarButton.BackgroundColor3 = Color3.fromRGB(0, 120, 220)
-end)
-
-sidebarButton.MouseLeave:Connect(function()
-    buttonHint.Visible = false
-    sidebarStroke.Color = Color3.fromRGB(0, 150, 255)
-    sidebarButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-end)
-
--- 側邊按鈕點擊（只為電腦設備）
-if not isMobile then
-    sidebarButton.MouseButton1Click:Connect(function()
-        toggleUI()
-    end)
-end
-
--- 關閉按鈕
-closeButton.MouseButton1Click:Connect(function()
-    toggleUI()
-end)
-
--- ========================
--- 快速攻擊功能
--- ========================
-local fastAttackActive = false
-local fastAttackConnection = nil
-
-local function toggleFastAttack()
-    fastAttackActive = not fastAttackActive
-    
-    if fastAttackActive then
-        fastAttackBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
-        fastAttackStatus.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        fastAttackIcon.Text = "✅"
-        fastAttackText.Text = "快速攻擊 [ON]"
-        
-        print("⚡ 快速攻擊已啟動")
-        
-        -- 設置快速攻擊標誌
-        _G.FastAttack = true
-        
-        -- 啟動快速攻擊
-        fastAttackConnection = task.spawn(function()
-            if _G.FastAttack then
-                local _ENV = (getgenv or getrenv or getfenv)()
-
-                local function SafeWaitForChild(parent, childName)
-                    local success, result = pcall(function()
-                        return parent:WaitForChild(childName)
-                    end)
-                    if not success or not result then
-                        warn("noooooo: " .. childName)
-                    end
-                    return result
-                end
-
-                local function WaitChilds(path, ...)
-                    local last = path
-                    for _, child in {...} do
-                        last = last:FindFirstChild(child) or SafeWaitForChild(last, child)
-                        if not last then break end
-                    end
-                    return last
-                end
-
-                local VirtualInputManager = game:GetService("VirtualInputManager")
-                local CollectionService = game:GetService("CollectionService")
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local TeleportService = game:GetService("TeleportService")
-                local RunService = game:GetService("RunService")
-                local Players = game:GetService("Players")
-                local Player = Players.LocalPlayer
-
-                if not Player then
-                    warn("未找到本地玩家.")
-                    return
-                end
-
-                local Remotes = SafeWaitForChild(ReplicatedStorage, "Remotes")
-                if not Remotes then return end
-
-                local Validator = SafeWaitForChild(Remotes, "Validator")
-                local CommF = SafeWaitForChild(Remotes, "CommF_")
-                local CommE = SafeWaitForChild(Remotes, "CommE")
-
-                local ChestModels = SafeWaitForChild(workspace, "ChestModels")
-                local WorldOrigin = SafeWaitForChild(workspace, "_WorldOrigin")
-                local Characters = SafeWaitForChild(workspace, "Characters")
-                local Enemies = SafeWaitForChild(workspace, "Enemies")
-                local Map = SafeWaitForChild(workspace, "Map")
-
-                local EnemySpawns = SafeWaitForChild(WorldOrigin, "EnemySpawns")
-                local Locations = SafeWaitForChild(WorldOrigin, "Locations")
-
-                local RenderStepped = RunService.RenderStepped
-                local Heartbeat = RunService.Heartbeat
-                local Stepped = RunService.Stepped
-
-                local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
-                local Net = SafeWaitForChild(Modules, "Net")
-
-                local sethiddenproperty = sethiddenproperty or function(...) return ... end
-                local setupvalue = setupvalue or (debug and debug.setupvalue)
-                local getupvalue = getupvalue or (debug and debug.getupvalue)
-
-                local Settings = {
-                    AutoClick = true,
-                    ClickDelay = 0.3
-                }
-
-                local Module = {}
-
-                Module.FastAttack = (function()
-                    if _ENV.rz_FastAttack then
-                        return _ENV.rz_FastAttack
-                    end
-
-                    local FastAttack = {
-                        Distance = 10000,
-                        attackMobs = true,
-                        attackPlayers = true,
-                        Equipped = nil
-                    }
-
-                    local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
-                    local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
-
-                    local function IsAlive(character)
-                    return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
-                    end
-
-                    local function ProcessEnemies(OthersEnemies, Folder)
-                        local BasePart = nil
-                        for _, Enemy in Folder:GetChildren() do
-                            local Head = Enemy:FindFirstChild("Head")
-                            if Head and IsAlive(Enemy) and Player:DistanceFromCharacter(Head.Position) < FastAttack.Distance then
-                                if Enemy ~= Player.Character then
-                                    table.insert(OthersEnemies, { Enemy, Head })
-                                    BasePart = Head
-                                end
-                            end
-                        end
-                        return BasePart
-                    end
-
-                    function FastAttack:Attack(BasePart, OthersEnemies)
-                        if not BasePart or #OthersEnemies == 0 then return end
-                        RegisterAttack:FireServer(Settings.ClickDelay or 0)
-                        RegisterHit:FireServer(BasePart, OthersEnemies)
-                    end
-
-                    function FastAttack:AttackNearest()
-                        local OthersEnemies = {}
-                        local Part1 = ProcessEnemies(OthersEnemies, Enemies)
-                        local Part2 = ProcessEnemies(OthersEnemies, Characters)
-                        if #OthersEnemies > 0 then
-                            self:Attack(Part1 or Part2, OthersEnemies)
-                        else
-                            task.wait(0)
-                        end
-                    end
-
-                    function FastAttack:BladeHits()
-                        local Equipped = IsAlive(Player.Character) and Player.Character:FindFirstChildOfClass("Tool")
-                        if Equipped and Equipped.ToolTip ~= "Gun" then
-                            self:AttackNearest()
-                        else
-                            task.wait(0)
-                        end
-                    end
-
-                    task.spawn(function()
-                        while task.wait(Settings.ClickDelay) do
-                            if not _G.FastAttack then  -- 檢查是否應該停止
-                                break
-                            end
-                            if Settings.AutoClick then
-                                FastAttack:BladeHits()
-                            end
-                        end
-                    end)
-
-                    _ENV.rz_FastAttack = FastAttack
-                    return FastAttack
-                end)()
-            end
-        end)
-        
-    else
-        fastAttackBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 55)
-        fastAttackStatus.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-        fastAttackIcon.Text = "⚡"
-        fastAttackText.Text = "快速攻擊"
-        
-        print("🛑 快速攻擊已停止")
-        
-        -- 停止快速攻擊
-        _G.FastAttack = false
-        
-        -- 如果有連接則停止
-        if fastAttackConnection then
-            pcall(function()
-                task.cancel(fastAttackConnection)
-                fastAttackConnection = nil
-            end)
-        end
-        
-        -- 清理環境變量
-        if getgenv then
-            getgenv().rz_FastAttack = nil
-        end
-    end
-end
+-- 創建選項卡
+local mainTab = window:CreateTab("主頁") 
+local scriptsTab = window:CreateTab("腳本") 
+local functionsTab = window:CreateTab("功能") 
+local settingsTab = window:CreateTab("設置")
 
 -- ========================
 -- 腳本加載功能
 -- ========================
-local function loadScript(name, url, button, status, text, icon)
+local function loadScript(name, url, button, iconLabel)
     print("📥 正在加載: " .. name)
     
     local success, result = pcall(function()
@@ -1076,21 +376,19 @@ local function loadScript(name, url, button, status, text, icon)
     
     if success then
         print("✅ " .. name .. " 加載成功")
-        if button and status then
-            button.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
-            status.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-            if icon then
-                icon.Text = "✅"
-            end
-            if text then
-                text.Text = text.Text .. " [已加載]"
-            end
+        if button and iconLabel then
+            button.Text = name .. " [已加載]"
+            button.TextColor3 = Color3.fromRGB(255, 215, 0)
+            iconLabel.Text = "👑"
+            iconLabel.TextSize = 16
         end
     else
         print("❌ " .. name .. " 加載失敗: " .. tostring(result))
-        if button and status then
-            button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-            status.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        if button and iconLabel then
+            button.Text = name .. " [失敗]"
+            button.TextColor3 = Color3.fromRGB(255, 50, 50)
+            iconLabel.Text = "❌"
+            iconLabel.TextSize = 16
         end
     end
     
@@ -1098,145 +396,510 @@ local function loadScript(name, url, button, status, text, icon)
 end
 
 -- ========================
--- 飛行腳本功能（使用您提供的新鏈接）
+-- 創建功能按鈕
 -- ========================
-local flightActive = false
-
-local function toggleFlight()
-    if flightActive then
-        -- 如果已經激活，顯示提示
-        flightBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 55)
-        flightStatus.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-        flightIcon.Text = "✈️"
-        flightText.Text = "飛行腳本"
-        print("✈️ 飛行腳本已關閉")
-        flightActive = false
-    else
-        -- 加載飛行腳本（使用您提供的新鏈接）
-        local success, result = loadScript(
-            "飛行腳本", 
-            "https://raw.githubusercontent.com/iqiq180jash-afk/Xuan/refs/heads/main/%E9%A3%9B%E8%A1%8C", 
-            flightBtn, 
-            flightStatus, 
-            flightText, 
-            flightIcon
-        )
-        
-        if success then
-            flightActive = true
-        else
-            flightActive = false
-        end
-    end
-end
-
--- 按鈕事件
-piScriptBtn.MouseButton1Click:Connect(function()
-    loadScript("皮腳本", "https://raw.githubusercontent.com/xiaopi77/xiaopi77/main/QQ1002100032-Roblox-Pi-script.lua", 
-               piScriptBtn, piStatus, piText, piIcon)
-end)
-
-xaBtn.MouseButton1Click:Connect(function()
-    loadScript("XA腳本", "https://raw.gitcode.com/Xingtaiduan/Scripts/raw/main/Loader.lua", 
-               xaBtn, xaStatus, xaText, xaIcon)
-end)
-
-flightBtn.MouseButton1Click:Connect(toggleFlight)
-
-fpsBoostBtn.MouseButton1Click:Connect(function()
-    loadScript("FPS優化", "https://raw.githubusercontent.com/kexuan001/rjrym/refs/heads/main/fpsboost", 
-               fpsBoostBtn, fpsStatus, fpsText, fpsIcon)
-end)
-
-fastAttackBtn.MouseButton1Click:Connect(toggleFastAttack)
-
--- ========================
--- 自動V4功能
--- ========================
-local autoV4Active = false
-local autoV4Connection = nil
-
-local function callAwakeningRemote()
-    local Backpack = player:FindFirstChild("Backpack")
-    if not Backpack then 
-        warn("找不到背包")
-        return false
-    end
+local function createFunctionButton(name, parent, callback)
+    local btnFrame = Instance.new("Frame", parent)
+    btnFrame.Size = UDim2.new(1, -20, 0, 45)
+    btnFrame.BackgroundTransparency = 1
+    btnFrame.LayoutOrder = parent:GetChildren() and #parent:GetChildren() or 0
     
-    local Awakening = Backpack:FindFirstChild("Awakening")
-    if not Awakening then 
-        warn("找不到Awakening")
-        return false
-    end
+    local btn = Instance.new("TextButton", btnFrame)
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.Text = name
+    btn.BackgroundColor3 = Color3.fromRGB(30, 25, 15)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.AutoButtonColor = true
+    btn.BorderSizePixel = 0
     
-    local RemoteFunc = Awakening:FindFirstChild("RemoteFunction")
-    if not RemoteFunc or not RemoteFunc:IsA("RemoteFunction") then 
-        warn("找不到RemoteFunction或類型錯誤")
-        return false
-    end
+    local icon = Instance.new("TextLabel", btn)
+    icon.Size = UDim2.new(0, 35, 1, 0)
+    icon.Position = UDim2.new(0, 10, 0, 0)
+    icon.Text = "⚡"
+    icon.TextColor3 = Color3.fromRGB(255, 215, 0)
+    icon.BackgroundTransparency = 1
+    icon.Font = Enum.Font.GothamBold
+    icon.TextSize = 16
+    icon.TextXAlignment = "Left"
     
-    local success, err = pcall(function()
-        RemoteFunc:InvokeServer(true)
+    local status = Instance.new("Frame", btn)
+    status.Size = UDim2.new(0, 10, 0, 10)
+    status.Position = UDim2.new(1, -15, 0.5, -5)
+    status.BackgroundColor3 = Color3.fromRGB(100, 90, 60)
+    Instance.new("UICorner", status).CornerRadius = UDim.new(1, 0)
+    Instance.new("UICorner", btn)
+    
+    btn.MouseEnter:Connect(function()
+        btn.BackgroundColor3 = Color3.fromRGB(40, 35, 20)
+        icon.TextColor3 = Color3.fromRGB(255, 255, 100)
     end)
-    if not success then
-        warn("自动v4调用失败：", err)
-        return false
-    end
     
-    return true
+    btn.MouseLeave:Connect(function()
+        if status.BackgroundColor3 == Color3.fromRGB(255, 215, 0) then
+            btn.BackgroundColor3 = Color3.fromRGB(30, 40, 20)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(30, 25, 15)
+            icon.TextColor3 = Color3.fromRGB(255, 215, 0)
+        end
+    end)
+    
+    btn.MouseButton1Click:Connect(function()
+        if callback then
+            callback(btn, status, icon)
+        end
+    end)
+    
+    return btn, status, icon
 end
 
-local function toggleAutoV4()
-    autoV4Active = not autoV4Active
+-- ========================
+-- 主頁內容 (修改：G八中心標題，移除關閉按鈕)
+-- ========================
+-- 創建主頁頂部標題欄
+local mainHeader = Instance.new("Frame", mainTab)
+mainHeader.Name = "MainHeader"
+mainHeader.Size = UDim2.new(1, -20, 0, 40)
+mainHeader.Position = UDim2.new(0, 10, 0, 10)
+mainHeader.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+mainHeader.BackgroundTransparency = 0.3
+mainHeader.BorderSizePixel = 0
+Instance.new("UICorner", mainHeader)
+
+-- G八中心標題 (置中) - 移除關閉按鈕
+local g8CenterTitle = Instance.new("TextLabel", mainHeader)
+g8CenterTitle.Size = UDim2.new(1, 0, 1, 0) -- 佔滿整個標題欄
+g8CenterTitle.Position = UDim2.new(0, 0, 0, 0)
+g8CenterTitle.Text = "🎮 G八中心"
+g8CenterTitle.TextColor3 = Color3.fromRGB(255, 215, 0)
+g8CenterTitle.BackgroundTransparency = 1
+g8CenterTitle.Font = Enum.Font.GothamBold
+g8CenterTitle.TextSize = 20
+g8CenterTitle.TextXAlignment = "Center"
+g8CenterTitle.TextYAlignment = "Center"
+
+-- 主頁內容容器
+local mainContainer = Instance.new("Frame", mainTab)
+mainContainer.Size = UDim2.new(1, -20, 1, -60)
+mainContainer.Position = UDim2.new(0, 10, 0, 60)
+mainContainer.BackgroundTransparency = 1
+
+local titleLabel = Instance.new("TextLabel", mainContainer)
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.Position = UDim2.new(0, 0, 0, 0)
+titleLabel.Text = "👑 玄丛腳本 v9.8"
+titleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 22
+
+local authorLabel = Instance.new("TextLabel", mainContainer)
+authorLabel.Size = UDim2.new(1, 0, 0, 30)
+authorLabel.Position = UDim2.new(0, 0, 0, 55)
+authorLabel.Text = "by 秦始皇"
+authorLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+authorLabel.BackgroundTransparency = 1
+authorLabel.Font = Enum.Font.Gotham
+authorLabel.TextSize = 16
+
+local supportLabel = Instance.new("TextLabel", mainContainer)
+supportLabel.Size = UDim2.new(1, 0, 0, 25)
+supportLabel.Position = UDim2.new(0, 0, 0, 90)
+supportLabel.Text = "✅ PC支持此腳本"
+supportLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+supportLabel.BackgroundTransparency = 1
+supportLabel.Font = Enum.Font.GothamBold
+supportLabel.TextSize = 15
+
+local descLabel = Instance.new("TextLabel", mainContainer)
+descLabel.Size = UDim2.new(1, 0, 0, 90)
+descLabel.Position = UDim2.new(0, 0, 0, 120)
+descLabel.Text = "專業級遊戲輔助工具\n多功能腳本集合系統\n點擊左上角皇冠按鈕開啟/關閉"
+descLabel.TextColor3 = Color3.fromRGB(220, 220, 240)
+descLabel.BackgroundTransparency = 1
+descLabel.Font = Enum.Font.Gotham
+descLabel.TextSize = 14
+descLabel.TextWrapped = true
+descLabel.LineHeight = 1.3
+
+local extraInfo = Instance.new("TextLabel", mainContainer)
+extraInfo.Size = UDim2.new(1, 0, 0, 60)
+extraInfo.Position = UDim2.new(0, 0, 0, 220)
+extraInfo.Text = "📌 使用說明：\n• 點擊功能按鈕啟用對應功能\n• 腳本需要網絡連接加載\n• 建議在單人遊戲中使用"
+extraInfo.TextColor3 = Color3.fromRGB(180, 200, 255)
+extraInfo.BackgroundTransparency = 1
+extraInfo.Font = Enum.Font.Gotham
+extraInfo.TextSize = 12
+extraInfo.TextWrapped = true
+extraInfo.LineHeight = 1.4
+
+-- ========================
+-- 腳本頁面內容
+-- ========================
+local piBtn, piStatus, piIcon = createFunctionButton("皮腳本", scriptsTab, function(btn, status, icon)
+    loadScript("皮腳本", "https://raw.githubusercontent.com/xiaopi77/xiaopi77/main/QQ1002100032-Roblox-Pi-script.lua", btn, icon)
+end)
+
+local xaBtn, xaStatus, xaIcon = createFunctionButton("XA腳本", scriptsTab, function(btn, status, icon)
+    loadScript("XA腳本", "https://raw.gitcode.com/Xingtaiduan/Scripts/raw/main/Loader.lua", btn, icon)
+end)
+
+-- ========================
+-- 快速攻擊功能
+-- ========================
+local fastAttackActive = false
+local fastAttackConnection = nil
+
+local function setupFastAttack()
+    if not fastAttackActive then return end
     
-    if autoV4Active then
-        autoV4Btn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
-        autoV4Status.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        autoV4Icon.Text = "✅"
-        autoV4Text.Text = "自動V4 [ON]"
-        
-        print("🌀 自動V4已啟動")
-        
-        -- 啟動自動V4循環
-        autoV4Connection = task.spawn(function()
-            while autoV4Active do
-                -- 調用Awakening遠程函數
-                local success = callAwakeningRemote()
-                if success then
-                    print("✅ 成功調用V4覺醒")
-                end
-                
-                -- 等待一段時間再嘗試（避免過於頻繁）
-                task.wait(5) -- 每5秒嘗試一次
+    _G.FastAttack = true
+
+    if _G.FastAttack then
+        local _ENV = (getgenv or getrenv or getfenv)()
+
+        local function SafeWaitForChild(parent, childName)
+            local success, result = pcall(function()
+                return parent:WaitForChild(childName)
+            end)
+            if not success or not result then
+                warn("noooooo: " .. childName)
             end
-        end)
+            return result
+        end
+
+        local function WaitChilds(path, ...)
+            local last = path
+            for _, child in {...} do
+                last = last:FindFirstChild(child) or SafeWaitForChild(last, child)
+                if not last then break end
+            end
+            return last
+        end
+
+        local VirtualInputManager = game:GetService("VirtualInputManager")
+        local CollectionService = game:GetService("CollectionService")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local TeleportService = game:GetService("TeleportService")
+        local RunService = game:GetService("RunService")
+        local Players = game:GetService("Players")
+        local Player = Players.LocalPlayer
+
+        if not Player then
+            warn("未找到本地玩家.")
+            return
+        end
+
+        local Remotes = SafeWaitForChild(ReplicatedStorage, "Remotes")
+        if not Remotes then return end
+
+        local Validator = SafeWaitForChild(Remotes, "Validator")
+        local CommF = SafeWaitForChild(Remotes, "CommF_")
+        local CommE = SafeWaitForChild(Remotes, "CommE")
+
+        local ChestModels = SafeWaitForChild(workspace, "ChestModels")
+        local WorldOrigin = SafeWaitForChild(workspace, "_WorldOrigin")
+        local Characters = SafeWaitForChild(workspace, "Characters")
+        local Enemies = SafeWaitForChild(workspace, "Enemies")
+        local Map = SafeWaitForChild(workspace, "Map")
+
+        local EnemySpawns = SafeWaitForChild(WorldOrigin, "EnemySpawns")
+        local Locations = SafeWaitForChild(WorldOrigin, "Locations")
+
+        local RenderStepped = RunService.RenderStepped
+        local Heartbeat = RunService.Heartbeat
+        local Stepped = RunService.Stepped
+
+        local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
+        local Net = SafeWaitForChild(Modules, "Net")
+
+        local sethiddenproperty = sethiddenproperty or function(...) return ... end
+        local setupvalue = setupvalue or (debug and debug.setupvalue)
+        local getupvalue = getupvalue or (debug and debug.getupvalue)
+
+        local Settings = {
+            AutoClick = true,
+            ClickDelay = 0.0000000001
+        }
+
+        local Module = {}
+
+        Module.FastAttack = (function()
+            if _ENV.rz_FastAttack then
+                return _ENV.rz_FastAttack
+            end
+
+            local FastAttack = {
+                Distance = 10000,
+                attackMobs = true,
+                attackPlayers = true,
+                Equipped = nil
+            }
+
+            local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
+            local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
+
+            local function IsAlive(character)
+            return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
+            end
+
+            local function ProcessEnemies(OthersEnemies, Folder)
+                local BasePart = nil
+                for _, Enemy in Folder:GetChildren() do
+                    local Head = Enemy:FindFirstChild("Head")
+                    if Head and IsAlive(Enemy) and Player:DistanceFromCharacter(Head.Position) < FastAttack.Distance then
+                        if Enemy ~= Player.Character then
+                            table.insert(OthersEnemies, { Enemy, Head })
+                            BasePart = Head
+                        end
+                    end
+                end
+                return BasePart
+            end
+
+            function FastAttack:Attack(BasePart, OthersEnemies)
+                if not BasePart or #OthersEnemies == 0 then return end
+                RegisterAttack:FireServer(Settings.ClickDelay or 0)
+                RegisterHit:FireServer(BasePart, OthersEnemies)
+            end
+
+            function FastAttack:AttackNearest()
+                local OthersEnemies = {}
+                local Part1 = ProcessEnemies(OthersEnemies, Enemies)
+                local Part2 = ProcessEnemies(OthersEnemies, Characters)
+                if #OthersEnemies > 0 then
+                    self:Attack(Part1 or Part2, OthersEnemies)
+                else
+                    task.wait(0)
+                end
+            end
+
+            function FastAttack:BladeHits()
+                local Equipped = IsAlive(Player.Character) and Player.Character:FindFirstChildOfClass("Tool")
+                if Equipped and Equipped.ToolTip ~= "Gun" then
+                    self:AttackNearest()
+                else
+                    task.wait(0)
+                end
+            end
+
+            task.spawn(function()
+                while task.wait(Settings.ClickDelay) do
+                    if not _G.FastAttack then
+                        break
+                    end
+                    if Settings.AutoClick then
+                        FastAttack:BladeHits()
+                    end
+                end
+            end)
+
+            _ENV.rz_FastAttack = FastAttack
+            return FastAttack
+        end)()
+    end
+end
+
+-- ========================
+-- 功能頁面內容
+-- ========================
+-- 快速攻擊功能
+local fastAttackBtn, fastAttackStatus, fastAttackIcon = createFunctionButton("快速攻擊 [OFF]", functionsTab, function(btn, status, icon)
+    fastAttackActive = not fastAttackActive
+    
+    if fastAttackActive then
+        btn.Text = "快速攻擊 [ON]"
+        btn.BackgroundColor3 = Color3.fromRGB(30, 40, 20)
+        status.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        icon.Text = "👑"
+        icon.TextColor3 = Color3.fromRGB(255, 215, 0)
+        icon.TextSize = 16
+        
+        print("⚡ 快速攻擊已啟動")
+        
+        setupFastAttack()
         
     else
-        autoV4Btn.BackgroundColor3 = Color3.fromRGB(30, 40, 55)
-        autoV4Status.BackgroundColor3 = Color3.fromRGB(80, 80, 100)
-        autoV4Icon.Text = "🌀"
-        autoV4Text.Text = "自動V4"
+        btn.Text = "快速攻擊 [OFF]"
+        btn.BackgroundColor3 = Color3.fromRGB(30, 25, 15)
+        status.BackgroundColor3 = Color3.fromRGB(100, 90, 60)
+        icon.Text = "⚡"
+        icon.TextColor3 = Color3.fromRGB(255, 215, 0)
+        icon.TextSize = 16
         
-        print("🛑 自動V4已停止")
+        print("🛑 快速攻擊已停止")
+        _G.FastAttack = false
         
-        -- 停止自動V4循環
-        if autoV4Connection then
+        if getgenv then
+            getgenv().rz_FastAttack = nil
+        end
+        
+        if fastAttackConnection then
             pcall(function()
-                task.cancel(autoV4Connection)
-                autoV4Connection = nil
+                task.cancel(fastAttackConnection)
+                fastAttackConnection = nil
             end)
         end
     end
-end
+end)
 
-autoV4Btn.MouseButton1Click:Connect(toggleAutoV4)
+-- 飛行腳本功能
+local flightBtn, flightStatus, flightIcon = createFunctionButton("飛行腳本 [未加載]", functionsTab, function(btn, status, icon)
+    loadScript("飛行腳本", "https://raw.githubusercontent.com/iqiq180jash-afk/Xuan/refs/heads/main/%E9%A3%9B%E8%A1%8C", btn, icon)
+end)
 
--- ESC鍵關閉主UI
+-- FPS優化功能
+local fpsBtn, fpsStatus, fpsIcon = createFunctionButton("FPS優化 [未加載]", functionsTab, function(btn, status, icon)
+    loadScript("FPS優化", "https://raw.githubusercontent.com/kexuan001/rjrym/refs/heads/main/fpsboost", btn, icon)
+end)
+
+-- 自動V4功能
+local autoV4Btn, autoV4Status, autoV4Icon = createFunctionButton("自動V4 [OFF]", functionsTab, function(btn, status, icon)
+    local active = library._Functions["autoV4"] or false
+    library._Functions["autoV4"] = not active
+    
+    if library._Functions["autoV4"] then
+        btn.Text = "自動V4 [ON]"
+        btn.BackgroundColor3 = Color3.fromRGB(30, 40, 20)
+        status.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
+        icon.Text = "👑"
+        icon.TextColor3 = Color3.fromRGB(255, 215, 0)
+        icon.TextSize = 16
+        
+        print("🌀 自動V4已啟動")
+        
+        task.spawn(function()
+            while library._Functions["autoV4"] do
+                local Backpack = lp:FindFirstChild("Backpack")
+                if Backpack then
+                    local Awakening = Backpack:FindFirstChild("Awakening")
+                    if Awakening then
+                        local RemoteFunc = Awakening:FindFirstChild("RemoteFunction")
+                        if RemoteFunc and RemoteFunc:IsA("RemoteFunction") then
+                            pcall(function()
+                                RemoteFunc:InvokeServer(true)
+                            end)
+                        end
+                    end
+                end
+                task.wait(5)
+            end
+        end)
+    else
+        btn.Text = "自動V4 [OFF]"
+        btn.BackgroundColor3 = Color3.fromRGB(30, 25, 15)
+        status.BackgroundColor3 = Color3.fromRGB(100, 90, 60)
+        icon.Text = "🌀"
+        icon.TextColor3 = Color3.fromRGB(255, 215, 0)
+        icon.TextSize = 16
+        
+        print("🛑 自動V4已停止")
+    end
+end)
+
+-- ========================
+-- 設置頁面內容
+-- ========================
+local deviceLabel = Instance.new("TextLabel", settingsTab)
+deviceLabel.Size = UDim2.new(1, -20, 0, 30)
+deviceLabel.Position = UDim2.new(0, 10, 0, 10)
+deviceLabel.Text = "設備類型: " .. deviceType
+deviceLabel.TextColor3 = Color3.fromRGB(220, 220, 240)
+deviceLabel.BackgroundTransparency = 1
+deviceLabel.Font = Enum.Font.GothamBold
+deviceLabel.TextSize = 15
+
+local dragInfo = Instance.new("TextLabel", settingsTab)
+dragInfo.Size = UDim2.new(1, -20, 0, 50)
+dragInfo.Position = UDim2.new(0, 10, 0, 50)
+dragInfo.Text = "按住 👑 按鈕可以拖動\n按住主窗口標題欄可以拖動窗口"
+dragInfo.TextColor3 = Color3.fromRGB(150, 200, 255)
+dragInfo.BackgroundTransparency = 1
+dragInfo.Font = Enum.Font.Gotham
+dragInfo.TextSize = 14
+dragInfo.TextWrapped = true
+dragInfo.LineHeight = 1.3
+
+local creditsLabel = Instance.new("TextLabel", settingsTab)
+creditsLabel.Size = UDim2.new(1, -20, 0, 80)
+creditsLabel.Position = UDim2.new(0, 10, 0, 110)
+creditsLabel.Text = "玄丛腳本 v9.8\nShadowLib UI 系統\n製作者: 秦始皇\n主要功能: 快速攻擊、腳本加載"
+creditsLabel.TextColor3 = Color3.fromRGB(200, 200, 220)
+creditsLabel.BackgroundTransparency = 1
+creditsLabel.Font = Enum.Font.Gotham
+creditsLabel.TextSize = 14
+creditsLabel.TextWrapped = true
+creditsLabel.LineHeight = 1.3
+
+-- ========================
+-- 窗口標題欄
+-- ========================
+local titleBar = Instance.new("Frame", window.Main)
+titleBar.Name = "TitleBar"
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+titleBar.BackgroundTransparency = 0.3
+titleBar.BorderSizePixel = 0
+
+local titleText = Instance.new("TextLabel", titleBar)
+titleText.Size = UDim2.new(1, -50, 1, 0)
+titleText.Position = UDim2.new(0, 15, 0, 0)
+titleText.Text = "玄丛腳本 v9.8"
+titleText.TextColor3 = Color3.fromRGB(255, 215, 0)
+titleText.BackgroundTransparency = 1
+titleText.Font = Enum.Font.GothamBold
+titleText.TextSize = 16
+titleText.TextXAlignment = "Left"
+titleText.TextYAlignment = "Center"
+
+-- 窗口關閉按鈕
+local closeBtn = Instance.new("TextButton", titleBar)
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -30, 0.5, -12.5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+closeBtn.BackgroundTransparency = 0.5
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+closeBtn.AutoButtonColor = true
+
+local closeCorner = Instance.new("UICorner", closeBtn)
+closeCorner.CornerRadius = UDim.new(0.2, 0)
+
+local closeStroke = Instance.new("UIStroke", closeBtn)
+closeStroke.Color = Color3.fromRGB(80, 80, 100)
+closeStroke.Thickness = 1.5
+
+closeBtn.MouseButton1Click:Connect(function()
+    window.Main.Visible = false
+end)
+
+closeBtn.MouseEnter:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+    closeStroke.Color = Color3.fromRGB(100, 100, 120)
+end)
+
+closeBtn.MouseLeave:Connect(function()
+    closeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    closeBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+    closeStroke.Color = Color3.fromRGB(80, 80, 100)
+end)
+
+-- 讓標題欄可拖動
+library:AddDrag(titleBar)
+
+-- ========================
+-- ESC鍵關閉功能
+-- ========================
 if not isMobile then
-    inputService.InputBegan:Connect(function(input, gameProcessed)
+    uis.InputBegan:Connect(function(input, gameProcessed)
         if not gameProcessed and input.KeyCode == Enum.KeyCode.Escape then
-            if isUIVisible then
-                toggleUI()
+            if window.Main and window.Main.Visible then
+                window.Main.Visible = false
             end
         end
     end)
@@ -1246,20 +909,29 @@ end
 -- 初始化完成
 -- ========================
 print("🎮 =================================")
-print("🎮 玄丛腳本 v9.8 - 加載完成")
+print("🎮 玄丛腳本 v9.8 - ShadowLib風格")
 print("🎮 設備: " .. deviceType)
 print("🎮 功能特色:")
-print("🎮   ✅ Luna Interface Suite 載入畫面（無黑色背景）")
-print("🎮   ✅ 腳本區/功能區分類顯示（下移15px）")
-print("🎮   ✅ 快速攻擊功能（新版代碼）")
-print("🎮   ✅ 飛行腳本（新鏈接版本）")
-print("🎮   ✅ 自動V4功能（本地調用，每5秒一次）")
-print("🎮   ✅ 側邊按鈕可拖動移動")
-print("🎮   ✅ 橫向現代化UI")
-print("🎮   ✅ 多腳本加載")
+print("🎮   ✅ G八中心標題 (無關閉按鈕)")
+print("🎮   ✅ 圓形皇冠移動按鈕 👑")
+print("🎮   ✅ PC支持此腳本")
+print("🎮   ✅ 腳本頁面：皮腳本、XA腳本")
+print("🎮   ✅ 功能頁面：快速攻擊、飛行腳本、FPS優化、自動V4")
+print("🎮   ✅ 完整的快速攻擊代碼")
+print("🎮   ✅ 增大文字 - 更清晰易讀")
+print("🎮   ✅ 窗口大小: 500x320")
+print("🎮   ✅ 窗口標題欄關閉按鈕")
 print("🎮 =================================")
 
 print("🚀 腳本加載完成！")
-print("💡 屏幕左上角有藍色⚙️按鈕")
-print("💡 按住⚙️按鈕可以拖動到任意位置")
-print("💡 點擊⚙️按鈕打開主界面")
+print("🎮 G八中心 - 主頁")
+print("📁 腳本頁面 (2個腳本):")
+print("   📜 皮腳本")
+print("   📜 XA腳本")
+print("⚙️ 功能頁面 (4個功能):")
+print("   ⚡ 快速攻擊")
+print("   ✈️ 飛行腳本")
+print("   🖥️ FPS優化")
+print("   🌀 自動V4")
+print("💡 屏幕左上角有 👑 圓形皇冠按鈕")
+print("💡 點擊 👑 按鈕打開主界面")
