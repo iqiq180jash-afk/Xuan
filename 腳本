@@ -1,6 +1,6 @@
--- [[ 秦始皇 - 萬世開平 V40 ]]
+-- [[ 秦始皇 - 萬世開平 V41 ]]
 
-local UI_TAG = "Qin_Final_V40"
+local UI_TAG = "Qin_Final_V41"
 local S_CG = game:GetService("CoreGui")
 if S_CG:FindFirstChild(UI_TAG) then S_CG[UI_TAG]:Destroy(); getgenv().StopLoops = true; task.wait(0.1) end
 getgenv().StopLoops = false
@@ -19,7 +19,7 @@ getgenv().CaiHuaConfig = {
     Settings = { AtkRange = 500, ClickDelay = 0.1, WalkSpd = 16, JumpPower = 50, FOV = 70 }
 }
 
--- [[ 2. UI 渲染 ]]
+-- [[ 2. UI 框架 ]]
 local SG = Instance.new("ScreenGui", S_CG); SG.Name = UI_TAG; SG.ResetOnSpawn = false
 local function ApplyROG(obj, thick)
     local stroke = Instance.new("UIStroke", obj); stroke.Thickness = thick; stroke.ApplyStrokeMode = "Border"
@@ -30,13 +30,10 @@ local Main = Instance.new("Frame", SG); Main.BackgroundColor3 = Color3.fromRGB(1
 local Side = Instance.new("Frame", Main); Side.Size = UDim2.new(0, 130, 1, 0); Side.BackgroundColor3 = Color3.fromRGB(22, 22, 28); Instance.new("UICorner", Side)
 Instance.new("UIListLayout", Side).HorizontalAlignment = "Center"; Instance.new("UIPadding", Side).PaddingTop = UDim.new(0, 10)
 
--- [[ 資訊欄 - 補回虛擬名稱與玩家名稱 ]]
+-- 雙名稱顯示
 local UserPart = Instance.new("Frame", Side); UserPart.Size = UDim2.new(1, 0, 0, 95); UserPart.BackgroundTransparency = 1
 local Avatar = Instance.new("ImageLabel", UserPart); Avatar.Size = UDim2.new(0, 40, 0, 40); Avatar.Position = UDim2.new(0.5, -20, 0, 0); Avatar.Image = "rbxthumb://type=AvatarHeadShot&id="..LP.UserId.."&w=150&h=150"; Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1,0)
-
--- 顯示虛擬名稱 (DisplayName)
 local DN = Instance.new("TextLabel", UserPart); DN.Size = UDim2.new(1,0,0,15); DN.Position = UDim2.new(0,0,0,45); DN.Text = LP.DisplayName; DN.TextColor3 = Color3.new(1,1,1); DN.Font = "GothamBold"; DN.TextSize = 10; DN.BackgroundTransparency = 1
--- 顯示玩家名稱 (Username)
 local UN = Instance.new("TextLabel", UserPart); UN.Size = UDim2.new(1,0,0,12); UN.Position = UDim2.new(0,0,0,60); UN.Text = "@"..LP.Name; UN.TextColor3 = Color3.fromRGB(180, 180, 180); UN.Font = "Gotham"; UN.TextSize = 8; UN.BackgroundTransparency = 1
 
 local Container = Instance.new("Frame", Main); Container.Position = UDim2.new(0, 140, 0, 10); Container.Size = UDim2.new(1, -150, 1, -20); Container.BackgroundTransparency = 1
@@ -49,7 +46,7 @@ local function CreateTab(name)
     table.insert(Tabs, F); return F
 end
 
--- 組件生成
+-- 通用組件
 local function AddToggle(p, t, f)
     local B = Instance.new("TextButton", p); B.Size = UDim2.new(0.95, 0, 0, 32); B.BackgroundColor3 = Color3.fromRGB(45, 45, 55); B.Text = t.." [OFF]"; B.TextColor3 = Color3.new(1,1,1); B.Font = "GothamBold"; B.TextSize = 11; Instance.new("UICorner", B)
     B.MouseButton1Click:Connect(function() if type(f) == "string" then getgenv().CaiHuaConfig.Toggles[f] = not getgenv().CaiHuaConfig.Toggles[f]; B.Text = t..(getgenv().CaiHuaConfig.Toggles[f] and " [ON]" or " [OFF]"); B.BackgroundColor3 = getgenv().CaiHuaConfig.Toggles[f] and Color3.fromRGB(120, 30, 30) or Color3.fromRGB(45, 45, 55) else f() end end)
@@ -62,44 +59,40 @@ local function AddSlider(p, t, min, max, def, isDec, cb)
     B.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then local m; m = S_UI.InputChanged:Connect(function(i2) if i2.UserInputType == Enum.UserInputType.MouseMovement or i2.UserInputType == Enum.UserInputType.Touch then local pVal = math.clamp((i2.Position.X - B.AbsolutePosition.X) / B.AbsoluteSize.X, 0, 1); S.Size = UDim2.new(pVal, 0, 1, 0); local val = min + (max - min) * pVal; val = isDec and math.floor(val*100)/100 or math.floor(val); L.Text = t..": "..val; cb(val) end end) S_UI.InputEnded:Connect(function(i3) if i3.UserInputType == Enum.UserInputType.MouseButton1 or i3.UserInputType == Enum.UserInputType.Touch then m:Disconnect() end end) end end)
 end
 
--- [[ 3. 功能分頁 ]]
+-- [[ 3. 分頁內容 ]]
 local T_Notice = CreateTab("📜 公告與關閉")
 local T_Combat = CreateTab("⚔️ 秒殺設置")
 local T_Player = CreateTab("🏃 玩家修改")
-local T_ESP = CreateTab("👁️ 透視相關")
+local T_ESP = CreateTab("👁️ 透視(僅玩家)")
 local T_Scripts = CreateTab("📂 外部腳本")
 
--- 公告頁面
+-- 公告
 local function AddLab(p,t,c) local l = Instance.new("TextLabel", p); l.Size = UDim2.new(1,0,0,25); l.Text=t; l.TextColor3=c or Color3.new(1,1,1); l.Font="GothamBold"; l.TextSize=12; l.BackgroundTransparency=1 end
 AddLab(T_Notice, "秦始皇製作", Color3.new(1,1,0))
 AddLab(T_Notice, "狀態: 測試中...", Color3.fromRGB(255, 100, 100))
-AddLab(T_Notice, "-------------------------")
 AddToggle(T_Notice, "🛑 徹底關閉並刪除 UI", function() getgenv().StopLoops = true; SG:Destroy() end)
 
--- 秒殺設置
+-- 秒殺
 AddToggle(T_Combat, "開啟快速攻擊", "FastAttack")
-AddSlider(T_Combat, "攻擊延遲", 0.01, 0.5, 0.1, true, function(v) getgenv().CaiHuaConfig.Settings.ClickDelay = v end)
-AddSlider(T_Combat, "攻擊範圍", 100, 5000, 500, false, function(v) getgenv().CaiHuaConfig.Settings.AtkRange = v end)
-AddToggle(T_Combat, "打小怪", "AttackMonsters")
-AddToggle(T_Combat, "打玩家", "AttackPlayers")
-AddToggle(T_Combat, "全部都打 (通殺)", "AttackAll")
+AddSlider(T_Combat, "攻擊速度", 0.01, 0.5, 0.1, true, function(v) getgenv().CaiHuaConfig.Settings.ClickDelay = v end)
+AddSlider(T_Combat, "秒殺範圍", 100, 5000, 500, false, function(v) getgenv().CaiHuaConfig.Settings.AtkRange = v end)
+AddToggle(T_Combat, "打小怪", "AttackMonsters"); AddToggle(T_Combat, "打玩家", "AttackPlayers"); AddToggle(T_Combat, "全部都打 (通殺)", "AttackAll")
 
--- 玩家修改
+-- 修改
 AddToggle(T_Player, "自動 V4 覺醒", "AutoV4")
-AddToggle(T_Player, "開啟速度修改", "SpeedActive")
-AddSlider(T_Player, "移動速度", 16, 500, 16, false, function(v) getgenv().CaiHuaConfig.Settings.WalkSpd = v end)
-AddToggle(T_Player, "開啟跳躍修改", "JumpActive")
-AddSlider(T_Player, "跳躍高度", 50, 500, 50, false, function(v) getgenv().CaiHuaConfig.Settings.JumpPower = v end)
+AddToggle(T_Player, "開啟速度修改", "SpeedActive"); AddSlider(T_Player, "移動速度", 16, 500, 16, false, function(v) getgenv().CaiHuaConfig.Settings.WalkSpd = v end)
+AddToggle(T_Player, "開啟跳躍修改", "JumpActive"); AddSlider(T_Player, "跳躍高度", 50, 500, 50, false, function(v) getgenv().CaiHuaConfig.Settings.JumpPower = v end)
 
--- 透視
-AddToggle(T_ESP, "透視總開關", "ESP_Main")
-AddToggle(T_ESP, "顯示名稱與距離", "ESP_NameDist")
-AddToggle(T_ESP, "顯示血量條", "ESP_Health")
+-- 透視 (僅限玩家玩家)
+AddToggle(T_ESP, "玩家透視總開關", "ESP_Main")
+AddToggle(T_ESP, "顯示名稱距離", "ESP_NameDist")
+AddToggle(T_ESP, "顯示血量", "ESP_Health")
 AddToggle(T_ESP, "開啟 ROG 連線", "ESP_Tracer")
 AddSlider(T_ESP, "視角 FOV", 70, 150, 70, false, function(v) getgenv().CaiHuaConfig.Settings.FOV = v end)
 
--- 外部腳本
+-- 外部腳本 (新增 XA)
 local function ATB(p, t, f) local B = Instance.new("TextButton", p); B.Size = UDim2.new(0.95, 0, 0, 30); B.BackgroundColor3 = Color3.fromRGB(40,40,50); B.Text = t; B.TextColor3 = Color3.new(1,1,1); B.Font="GothamBold"; B.TextSize=11; Instance.new("UICorner", B); B.MouseButton1Click:Connect(f) end
+ATB(T_Scripts, "🔥 XA 代碼", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/iqiq180jush-cell/Xuan/refs/heads/main/XA"))() end)
 ATB(T_Scripts, "🚀 P 腳本", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/iqiq180jush-cell/Xuan/refs/heads/main/p"))() end)
 ATB(T_Scripts, "⚡ FPS 優化", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/iqiq180jush-cell/Xuan/refs/heads/main/FPPS"))() end)
 ATB(T_Scripts, "🕊️ GG 飛行器", function() loadstring(game:HttpGet("https://raw.githubusercontent.com/iqiq180jash-afk/Xuan/refs/heads/main/%E9%A3%9B%E8%A1%8C"))() end)
@@ -108,18 +101,13 @@ ATB(T_Scripts, "🕊️ GG 飛行器", function() loadstring(game:HttpGet("https
 local MonF = Instance.new("Frame", SG); MonF.Size = UDim2.new(0, 200, 0, 160); MonF.Position = UDim2.new(0.8, 0, 0.4, 0); MonF.BackgroundColor3 = Color3.fromRGB(10,10,15); MonF.Visible = false; Instance.new("UICorner", MonF); ApplyROG(MonF, 2)
 Instance.new("UIListLayout", MonF).HorizontalAlignment = "Center"
 local function ML(t, c) local l = Instance.new("TextLabel", MonF); l.Size = UDim2.new(1,0,0,22); l.BackgroundTransparency=1; l.TextColor3= c or Color3.new(1,1,1); l.Font="Code"; l.TextSize=11; l.Text=t; l.TextXAlignment = "Center"; return l end
-local mFPS = ML("FPS: --", Color3.new(0,1,0.5))
-local mPing = ML("Ping: --", Color3.new(1,0.8,0))
-local mMem = ML("內存: -- MB", Color3.new(0,0.8,1))
-local mExec = ML("注入器: "..(identifyexecutor and identifyexecutor() or "未知"), Color3.new(1,0.4,0.4))
-local mDev = ML("裝置: "..((S_UI.TouchEnabled and not S_UI.MouseEnabled) and "手機" or "電腦"), Color3.new(0.7,0.7,0.7))
+local mFPS = ML("FPS: --", Color3.new(0,1,0.5)); local mPing = ML("Ping: --", Color3.new(1,0.8,0)); local mMem = ML("內存: -- MB", Color3.new(0,0.8,1)); local mExec = ML("注入器: "..(identifyexecutor and identifyexecutor() or "未知"), Color3.new(1,0.4,0.4)); local mDev = ML("裝置: "..((S_UI.TouchEnabled and not S_UI.MouseEnabled) and "手機" or "電腦"), Color3.new(0.7,0.7,0.7))
 local SideMonBtn = Instance.new("TextButton", Side); SideMonBtn.Size = UDim2.new(0.9, 0, 0, 30); SideMonBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50); SideMonBtn.Text = "⚡ 實時監測"; SideMonBtn.TextColor3 = Color3.new(1,1,1); SideMonBtn.Font = "GothamBold"; SideMonBtn.TextSize = 10; Instance.new("UICorner", SideMonBtn); SideMonBtn.MouseButton1Click:Connect(function() MonF.Visible = not MonF.Visible end)
 
--- [[ 5. 核心邏輯循環 ]]
+-- [[ 5. 核心邏輯 (僅玩家 ESP) ]]
 local function CreateESP(obj)
-    if not obj or obj == LP.Character then return end
-    local head = obj:WaitForChild("Head", 5)
-    local hum = obj:WaitForChild("Humanoid", 5)
+    if not obj or not S_PL:GetPlayerFromCharacter(obj) or obj == LP.Character then return end -- 嚴格過濾: 必須是玩家角色
+    local head = obj:WaitForChild("Head", 5); local hum = obj:WaitForChild("Humanoid", 5)
     if not head or not hum then return end
     local bg = Instance.new("BillboardGui", head); bg.Size = UDim2.new(0, 100, 0, 40); bg.StudsOffset = Vector3.new(0, 3, 0); bg.AlwaysOnTop = true
     local nL = Instance.new("TextLabel", bg); nL.Size = UDim2.new(1,0,0.5,0); nL.BackgroundTransparency=1; nL.TextColor3=Color3.new(1,1,1); nL.TextScaled=true; nL.Text=obj.Name
@@ -129,7 +117,7 @@ local function CreateESP(obj)
         if getgenv().StopLoops or not obj.Parent or hum.Health <= 0 or not getgenv().CaiHuaConfig.Toggles.ESP_Main then 
             bg.Enabled = false; line.Visible = false; if getgenv().StopLoops then conn:Disconnect() end return 
         end
-        bg.Enabled = true; nL.Visible = getgenv().CaiHuaConfig.Toggles.ESP_NameDist; hL.Visible = getgenv().CaiHuaConfig.Toggles.ESP_Health
+        bg.Enabled = true; nL.Visible = getgenv().CaiHuaConfig.Toggles.ESP_NameDist; hL.Visible = getgenv().CaiHuaConfig.Toggles.ESP_Health; nL.Text = obj.Name.." ["..math.floor(LP:DistanceFromCharacter(obj.PrimaryPart.Position)).."m]"
         local p = hum.Health/hum.MaxHealth; hL.TextColor3 = p > 0.7 and Color3.new(0,1,0) or (p > 0.3 and Color3.new(1,1,0) or Color3.new(1,0,0)); hL.Text = "HP: "..math.floor(hum.Health)
         if getgenv().CaiHuaConfig.Toggles.ESP_Tracer then
             local pos, vis = Camera:WorldToViewportPoint(obj.PrimaryPart.Position)
@@ -138,13 +126,8 @@ local function CreateESP(obj)
     end)
 end
 
-local function Scan()
-    for _,v in pairs(S_PL:GetPlayers()) do if v ~= LP and v.Character then CreateESP(v.Character) end end
-    S_PL.PlayerAdded:Connect(function(p) p.CharacterAdded:Connect(function(c) CreateESP(c) end) end)
-    workspace.Enemies.ChildAdded:Connect(CreateESP); for _,v in pairs(workspace.Enemies:GetChildren()) do CreateESP(v) end
-    workspace.Characters.ChildAdded:Connect(function(c) if c.Name ~= LP.Name then CreateESP(c) end end)
-end
-Scan()
+S_PL.PlayerAdded:Connect(function(p) p.CharacterAdded:Connect(function(c) CreateESP(c) end) end)
+for _,v in pairs(S_PL:GetPlayers()) do if v ~= LP and v.Character then CreateESP(v.Character) end end
 
 S_RS.RenderStepped:Connect(function()
     if getgenv().StopLoops then return end
@@ -174,7 +157,6 @@ task.spawn(function()
     end
 end)
 
--- 🥦 開關按鈕與拖動
 local CaiHuaBtn = Instance.new("TextButton", SG); CaiHuaBtn.Size = UDim2.new(0, 60, 0, 60); CaiHuaBtn.Position = UDim2.new(0, 30, 0, 30); CaiHuaBtn.BackgroundColor3 = Color3.new(0,0,0); CaiHuaBtn.Text = "🥦"; CaiHuaBtn.TextSize = 35; Instance.new("UICorner", CaiHuaBtn).CornerRadius = UDim.new(1,0); ApplyROG(CaiHuaBtn, 4)
 CaiHuaBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 local function Drag(o) local g, s, sp; o.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then g = true; s = i.Position; sp = o.Position end end) o.InputChanged:Connect(function(i) if g and (i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch) then local d = i.Position - s; o.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y) end end) o.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then g = false end end) end
